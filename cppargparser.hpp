@@ -44,22 +44,28 @@ struct ArgPair {
         return std::make_shared<ArgPair>();
     }
 public:
-    String asString() const {
+    String asString(String pDefault="") const {
+        if(this->mValue.length() == 0) return pDefault;
         return this->mValue;
     }
-    int asInt() const { 
+    int asInt(int pDefault=0) const { 
+        if(this->mValue.length() == 0) return pDefault;
         return std::stoi(this->mValue);
     }
-    int asLong() const { 
+    long asLong(long pDefault=0) const { 
+        if(this->mValue.length() == 0) return pDefault;
         return std::stol(this->mValue);
     }
-    float asFloat() const { 
+    float asFloat(float pDefault=0) const { 
+        if(this->mValue.length() == 0) return pDefault;
         return std::stof(this->mValue);
     }
-    float asDouble() const { 
-        return std::stof(this->mValue);
+    double asDouble(long pDefault=0) const { 
+        if(this->mValue.length() == 0) return pDefault;
+        return std::stod(this->mValue);
     }
-    float asBool() const { 
+    bool asBool(bool pDefault=false) const { 
+        if(this->mValue.length() == 0) return pDefault;
         return this->mValue == "true" || this->mValue == "yes";
     }
 };
@@ -117,6 +123,8 @@ public:
 class ArgParser {
 private:
     // Stage 1 - Initialization and setup
+    String mProgramName;
+
     Vector<ArgDefPtr> mArgs;
     Map<String, ArgDefPtr> mArgsMap;
     ArgDefPtr mArgFinal = NULL;
@@ -142,9 +150,9 @@ private:
     // Stage 2 - Results after parsing
     ArgParserResult mResult;
 
-    void handleArgPair(String key, String value) {
+    void handleArgPair(ArgDefPtr def, String value) {
         ArgPairPtr result = ArgPair::Create();
-        result->mArg = this->getArgDef(key);
+        result->mArg = def;
         if(result->mArg->mIsFlag) {
             result->mValue = "true";
         } else {
@@ -171,12 +179,13 @@ private:
 
 public:
     ArgParser() {
-
+        this->mProgramName = "PROGRAM";
     };
 
     String getHelp() {
         std::stringstream ss;
-        ss << "Help:\n";
+        ss << "Example Command: \n";
+        ss << "  " << this->getExampleCommand() << "\n\n";
         
         for(ArgDefPtr &def : this->mArgs) {
             ss << "  " << def->mName;
@@ -192,7 +201,29 @@ public:
             };
             ss << "\n\n";
         }
+        if(this->mHasFinalArg) {
+            ss << "  " << this->mArgFinal->mName;
+            ss << "\n    " << this->mArgFinal->mDescription << "\n\n";
+        }
+        return ss.str();
+    }
 
+    String getExampleCommand() {
+        std::stringstream ss;
+        ss << this->mProgramName << " ";
+        
+        for(ArgDefPtr &def : this->mArgs) {
+            if(def->mIsFlag) {
+                ss << "[" << def->mName << "] "; 
+            } else if(def->mOptional) {
+                ss << "[" << def->mName << " <value>] "; 
+            } else {
+                ss << "<" << def->mName << " <value>> "; 
+            }
+        }
+        if(this->mHasFinalArg) {
+            ss << this->mArgFinal->mName;
+        }
         return ss.str();
     }
 
@@ -244,7 +275,8 @@ public:
             if(isDone) {
                 isDone = false;
                 LOG("Got: (%s) -> (%s)\n", key.c_str(), val.c_str());
-                this->handleArgPair(key, val);
+                ArgDefPtr def = this->getArgDef(key);
+                this->handleArgPair(def, val);
                 key = "";
                 val = "";
             }
@@ -254,7 +286,7 @@ public:
         }
         if(this->mHasFinalArg) {
             String finalArg = String(argv[argc-1]);
-            this->handleArgPair(this->mArgFinal->mName, finalArg);
+            this->handleArgPair(this->mArgFinal, finalArg);
         }
         // Validate
         for(ArgDefPtr &def : this->mArgs) {
@@ -287,6 +319,10 @@ public:
     }
 
     // Config functions
+
+    void setProgramName(String pName) {
+        this->mProgramName = pName;
+    }
 
     void addArg(String pName, String pCSAliases, String pDesc="", bool opt=true) {
         LOG("Adding Arg (%s) -> %s\n", pName.c_str(), pDesc.c_str());

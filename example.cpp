@@ -5,16 +5,26 @@ using namespace argparse;
 
 int main(int argc, char** argv) {
     ArgParser argParser;
-    argParser.addArg("--input", "-i", "Input File", false);
+    argParser.setProgramName("cpp-arg-parser-test");
     argParser.addFlag("--colour", "-c", "Enable colour");
+    argParser.addArg("--output", "-o", "Output folder. Default to working directory");
+    argParser.addArg("--threads", "-t", "Number of threads to use", false);
+    argParser.setFinalArg("file", "The input file or folder to process");
 
     std::cout << argParser.getHelp() << std::endl;
-
+    
     argParser.parse(argc, argv);
 
-    String file = argParser["--input"].asString();
-    bool doColour = argParser["--colour"].asBool();
+    bool doColour = argParser["--colour"].asBool(false);
+    String file = argParser["file"].asString();
+    String output = argParser["--output"].asString();
+    int threads = argParser["--threads"].asInt();
 
-    std::cout << "Found param: " << file << "  DoColour: " << doColour << std::endl;
+    std::cout << "Found params: " << std::endl;
+
+    std::cout << "doColour: " << doColour << std::endl;
+    std::cout << "output: " << output << std::endl;
+    std::cout << "threads: " << threads << std::endl;
+    std::cout << "file: " << file << std::endl;
 
 }
