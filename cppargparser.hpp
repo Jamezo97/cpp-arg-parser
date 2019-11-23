@@ -444,6 +444,7 @@ public:
      * @brief Will force the parse function to catch exceptions
      * You can check if the arguments were passed by looking at
      * the returned boolean from the parse function.
+     * @param pCatchExceptions If true, will catch exceptions in 'parse'
      */
     void setCatchExceptions(bool pCatchExceptions) {
         this->mCfgCatchExceptions = pCatchExceptions;
@@ -454,6 +455,7 @@ public:
      * You can enable exception catching through 'setCatchExceptions', and then 
      * enable printed help messages with this function.
      * You can of course print the help manually with 'getHelp'
+     * @param pPrintHelpOnCaughtException If true, will print on caught exceptions
      */
     void setPrintHelpOnCaughtException(bool pPrintHelpOnCaughtException) {
         this->mCfgPrintHelpOnCaughtException = pPrintHelpOnCaughtException;
@@ -572,3 +574,18 @@ private:
 };
 
 #endif //__CPP_ARG_PARSER_HPP
+
+/**
+ * @mainpage CPP Argument Parser
+ * The "C++ Argument Parser" is a header-only library for parsing
+ * command line arguments. 
+ * 
+ * It makes very few assumptions about the style
+ * of arguments. e.g. they can start with '\-\-' or '/'.
+ * 
+ * Requires C++ 11.
+ * 
+ * See the example.cpp file for an example.
+ * 
+ * See ArgParser for more documentation
+ */

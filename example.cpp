@@ -2,6 +2,9 @@
 #include <iostream>
 #include <string>
 
+/**
+ * @brief Entry point for example
+ */
 int main(int argc, char** argv) {
     argparse::ArgParser argParser;
     argParser.setProgramName("cpp-arg-parser-test");
